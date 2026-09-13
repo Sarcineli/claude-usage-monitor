@@ -56,19 +56,19 @@ It only appears once there's enough to say honestly — roughly 5 minutes into a
 
 <table>
   <tr>
-    <td align="center"><img src="https://raw.githubusercontent.com/renatoaug/claude-usage-monitor/main/docs/media/idle.gif" width="280" alt="idle" /><br /><b>idle</b><br /><sub>breathes &amp; blinks</sub></td>
-    <td align="center"><img src="https://raw.githubusercontent.com/renatoaug/claude-usage-monitor/main/docs/media/working.gif" width="280" alt="working" /><br /><b>working</b><br /><sub>hops &amp; eats token coins</sub></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/renatoaug/claude-usage-monitor/a8491cea34c4a8547965eadc3b24618ba50218e1/docs/media/idle.gif" width="280" alt="idle" /><br /><b>idle</b><br /><sub>breathes &amp; blinks</sub></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/renatoaug/claude-usage-monitor/a8491cea34c4a8547965eadc3b24618ba50218e1/docs/media/working.gif" width="280" alt="working" /><br /><b>working</b><br /><sub>hops &amp; eats token coins</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="https://raw.githubusercontent.com/renatoaug/claude-usage-monitor/main/docs/media/on-fire.gif" width="280" alt="on fire" /><br /><b>on fire</b><br /><sub>session ≥ 90% → red, shivers, flames</sub></td>
-    <td align="center"><img src="https://raw.githubusercontent.com/renatoaug/claude-usage-monitor/main/docs/media/tired.gif" width="280" alt="maxed out" /><br /><b>maxed out</b><br /><sub>session at 100% → drained, slumped, sweating</sub></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/renatoaug/claude-usage-monitor/a8491cea34c4a8547965eadc3b24618ba50218e1/docs/media/on-fire.gif" width="280" alt="on fire" /><br /><b>on fire</b><br /><sub>session ≥ 90% → red, shivers, flames</sub></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/renatoaug/claude-usage-monitor/a8491cea34c4a8547965eadc3b24618ba50218e1/docs/media/tired.gif" width="280" alt="maxed out" /><br /><b>maxed out</b><br /><sub>session at 100% → drained, slumped, sweating</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="https://raw.githubusercontent.com/renatoaug/claude-usage-monitor/main/docs/media/sleeping.gif" width="280" alt="sleeping" /><br /><b>sleeping</b><br /><sub>idle 5+ min → blue zzz &amp; moonlight</sub></td>
-    <td align="center"><img src="https://raw.githubusercontent.com/renatoaug/claude-usage-monitor/main/docs/media/poke.gif" width="280" alt="poke" /><br /><b>poke</b><br /><sub>click the pet → squish &amp; hearts</sub></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/renatoaug/claude-usage-monitor/a8491cea34c4a8547965eadc3b24618ba50218e1/docs/media/sleeping.gif" width="280" alt="sleeping" /><br /><b>sleeping</b><br /><sub>idle 5+ min → blue zzz &amp; moonlight</sub></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/renatoaug/claude-usage-monitor/a8491cea34c4a8547965eadc3b24618ba50218e1/docs/media/poke.gif" width="280" alt="poke" /><br /><b>poke</b><br /><sub>click the pet → squish &amp; hearts</sub></td>
   </tr>
   <tr>
-    <td colspan="2" align="center"><img src="https://raw.githubusercontent.com/renatoaug/claude-usage-monitor/main/docs/media/celebrate.gif" width="280" alt="celebrate" /><br /><b>celebrate</b><br /><sub>session resets → jump &amp; confetti</sub></td>
+    <td colspan="2" align="center"><img src="https://raw.githubusercontent.com/renatoaug/claude-usage-monitor/a8491cea34c4a8547965eadc3b24618ba50218e1/docs/media/celebrate.gif" width="280" alt="celebrate" /><br /><b>celebrate</b><br /><sub>session resets → jump &amp; confetti</sub></td>
   </tr>
 </table>
 
@@ -83,11 +83,11 @@ own animated scene:
 
 <table>
   <tr>
-    <td align="center"><img src="https://raw.githubusercontent.com/renatoaug/claude-usage-monitor/main/docs/media/reading.gif" width="280" alt="reading" /><br /><b>reading</b><br /><sub>puts on glasses &amp; flips through docs</sub></td>
-    <td align="center"><img src="https://raw.githubusercontent.com/renatoaug/claude-usage-monitor/main/docs/media/editing.gif" width="280" alt="editing" /><br /><b>editing</b><br /><sub>types at the laptop, coffee in reach</sub></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/renatoaug/claude-usage-monitor/a8491cea34c4a8547965eadc3b24618ba50218e1/docs/media/reading.gif" width="280" alt="reading" /><br /><b>reading</b><br /><sub>an open book under the reading lamp</sub></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/renatoaug/claude-usage-monitor/a8491cea34c4a8547965eadc3b24618ba50218e1/docs/media/editing.gif" width="280" alt="editing" /><br /><b>editing</b><br /><sub>types at the desk, coffee in reach</sub></td>
   </tr>
   <tr>
-    <td colspan="2" align="center"><img src="https://raw.githubusercontent.com/renatoaug/claude-usage-monitor/main/docs/media/running.gif" width="280" alt="running" /><br /><b>running</b><br /><sub>watches a task log tick through its checks</sub></td>
+    <td colspan="2" align="center"><img src="https://raw.githubusercontent.com/renatoaug/claude-usage-monitor/a8491cea34c4a8547965eadc3b24618ba50218e1/docs/media/running.gif" width="280" alt="running" /><br /><b>running</b><br /><sub>watches a task log tick through its checks</sub></td>
   </tr>
 </table>
 
