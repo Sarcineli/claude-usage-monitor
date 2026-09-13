@@ -18,6 +18,17 @@ const SPRITE = [
   const body = el('body')
   const eyes = el('eyes')
   const C = 10
+  // Each pixel is its own <rect>, so neighbours share an edge. Under the mood
+  // animations the sprite is scaled by fractions, that edge lands between device
+  // pixels, and the card shows through as a hairline grid — crispEdges cannot
+  // help, it rounds in local space, before the transform. So a cell is grown to
+  // overlap the neighbour it actually has: same fill, invisible seam, and the
+  // silhouette stays exact because edge cells are left alone.
+  const SEAM = 0.5
+  const filled = (r, c) => {
+    const ch = SPRITE[r]?.[c]
+    return ch !== undefined && ch !== '.'
+  }
   SPRITE.forEach((row, r) => {
     for (let c = 0; c < row.length; c++) {
       const ch = row[c]
@@ -25,8 +36,8 @@ const SPRITE = [
       const rect = document.createElementNS(SVGNS, 'rect')
       rect.setAttribute('x', c * C)
       rect.setAttribute('y', r * C)
-      rect.setAttribute('width', C)
-      rect.setAttribute('height', C)
+      rect.setAttribute('width', C + (filled(r, c + 1) ? SEAM : 0))
+      rect.setAttribute('height', C + (filled(r + 1, c) ? SEAM : 0))
       body.appendChild(rect)
       if (ch === 'o') {
         const eye = document.createElementNS(SVGNS, 'rect')
@@ -36,39 +47,6 @@ const SPRITE = [
         eye.setAttribute('height', C)
         eyes.appendChild(eye)
       }
-    }
-  })
-})()
-
-// hard hat (mechanic mode): pixel-art bitmap so it matches the pet's blocky look
-;(function buildHat() {
-  const g = el('hardhat')
-  if (!g) return
-  // L = highlight, Y = main, D = shadow rim, B = brim
-  const HAT = [
-    '.....YLLY.....',
-    '...YYYLLYYY...',
-    '..YYYYLLYYYY..',
-    '.YYYYYLLYYYYY.',
-    '.DDDDDDDDDDDD.',
-    'BBBBBBBBBBBBBB',
-  ]
-  const COL = { L: '#ffe27a', Y: '#f5c518', D: '#d99a00', B: '#c98f14' }
-  const C = 8 // cell size in svg units
-  const cols = HAT[0].length
-  const ox = 50 - (cols * C) / 2 // centered on the head (center x = 50)
-  const oy = -24 // rises above the head, brim ends just over the eyes
-  HAT.forEach((row, r) => {
-    for (let c = 0; c < row.length; c++) {
-      const ch = row[c]
-      if (ch === '.') continue
-      const rect = document.createElementNS(SVGNS, 'rect')
-      rect.setAttribute('x', ox + c * C)
-      rect.setAttribute('y', oy + r * C)
-      rect.setAttribute('width', C)
-      rect.setAttribute('height', C)
-      rect.setAttribute('fill', COL[ch])
-      g.appendChild(rect)
     }
   })
 })()
@@ -375,8 +353,6 @@ function renderHeat(days) {
 // only comparable if every track starts and ends at the same x. So it is sized
 // to the widest label actually present, clamped so a long path cannot squeeze
 // the bars into stubs, and anything past the clamp is clipped with an ellipsis.
-const NAME_MIN = 64
-const BAR_MIN = 96 // room left for the track and the token count
 
 function renderBars(boxId, list, limit) {
   const box = el(boxId)
@@ -398,24 +374,9 @@ function renderBars(boxId, list, limit) {
     box.innerHTML = '<div class="mrow" style="opacity:.5">no activity</div>'
     return
   }
-  fitNames(box)
 }
 
 // measure the labels unconstrained, then lock the column to the widest one
-function fitNames(box) {
-  const names = [...box.querySelectorAll('.mname')]
-  // a collapsed section measures zero — it re-fits when it opens
-  if (!names.length || !box.offsetWidth) return
-  box.style.setProperty('--name-w', 'auto')
-  // offsetWidth, not getBoundingClientRect: the width we hand back is a layout px,
-  // so it has to be measured in layout px too. A CSS transform on an ancestor
-  // (the video stage scales the card) inflates the rect and squeezes the bars away.
-  let widest = 0
-  for (const n of names) widest = Math.max(widest, n.offsetWidth)
-  const room = box.offsetWidth - BAR_MIN
-  const w = Math.max(NAME_MIN, Math.min(widest + 2, room))
-  box.style.setProperty('--name-w', `${w}px`)
-}
 
 // per-model weekly limits (e.g. "Fable" on Max) — one meter each, in the same
 // shape as the all-models one. The token count pairs the limit with the local
@@ -431,11 +392,19 @@ function renderScoped(list, byModel) {
     const m = document.createElement('div')
     m.className = 'meter'
     m.innerHTML =
-      `<div class="meter-top"><span>weekly · ${esc(key)}</span><span>${Math.round(s.pct)}%</span></div>` +
-      `<div class="track"><div class="fill week${s.pct >= 80 ? ' high' : ''}" style="width:${s.pct}%"></div></div>` +
+      `<div class="meter-top"><span>weekly · ${esc(key)}</span><span class="${levelOf(s.pct)}">${Math.round(s.pct)}%</span></div>` +
+      `<div class="track"><div class="fill week${s.pct >= 80 ? ' high' : ''} ${levelOf(s.pct)}" style="width:${s.pct}%"></div></div>` +
       `<div class="sub">${s.resetMs != null ? `resets in ${fmtResetIn(s.resetMs)} · ` : ''}${fmtTokens(tokens)} tokens</div>`
     box.appendChild(m)
   }
+}
+
+// One ramp for every meter: plain below 60, warm to 85, hot past it. The number
+// and its bar always read the same level.
+const levelOf = (pct) => (pct >= 85 ? 'hot' : pct >= 60 ? 'mid' : '')
+function setLevel(node, pct) {
+  node.classList.toggle('mid', levelOf(pct) === 'mid')
+  node.classList.toggle('hot', levelOf(pct) === 'hot')
 }
 
 // by model (7 days)
@@ -576,6 +545,7 @@ function render(d) {
   if (liveOn && prevPct != null && sessActive && prevPct - sessPct > 25) celebrate()
   prevPct = sessPct
   el('session-pct').textContent = `${Math.round(sessPct)}%`
+  setLevel(el('session-pct'), liveOn ? sessPct : 0)
   const mini = el('mini-pct')
   mini.textContent = liveOn ? `${Math.round(sessPct)}%` : '—'
   mini.classList.toggle('high', liveOn && sessPct >= 80)
@@ -589,6 +559,7 @@ function render(d) {
   const sf = el('session-fill')
   sf.style.width = `${sessPct}%`
   sf.classList.toggle('high', sessPct >= 80)
+  setLevel(sf, sessPct)
   el('session-sub').textContent = sessActive
     ? `resets in ${fmtResetIn(sessReset)} · ${fmtTokens(d.session.tokens)} tokens`
     : 'no active session'
@@ -606,9 +577,11 @@ function render(d) {
   }
 
   el('week-pct').textContent = `${Math.round(wkPct)}%`
+  setLevel(el('week-pct'), wkPct)
   const wf = el('week-fill')
   wf.style.width = `${wkPct}%`
   wf.classList.toggle('high', wkPct >= 80)
+  setLevel(wf, wkPct)
   el('week-sub').textContent =
     wkReset != null
       ? `resets in ${fmtResetIn(wkReset)} · ${fmtTokens(d.week.tokens)} tokens`
@@ -655,7 +628,7 @@ function fitSize() {
 }
 
 // widget scale, applied as a CSS zoom (not transform) so offsetWidth/Height
-// keep reflecting it — see fitNames()'s comment on why transform can't be used here
+// keep reflecting it — offsetHeight is a layout px, so it must be measured as one
 function applyZoom(z) {
   document.body.style.zoom = (z || 100) / 100
 }
@@ -715,8 +688,11 @@ function paintChip() {
   const a = lastAccounts
   const active = (a?.accounts || []).find((x) => x.id === a?.active)
   const email = p?.email || (active?.connected ? active.label : null)
-  // the settings line says who is connected, not just that someone is
-  el('acc-ok').textContent = email ? `● ${email}${p?.plan ? ` · ${p.plan}` : ''}` : '● Connected'
+  // the settings block says who is connected, not just that someone is: the
+  // avatar carries the initial, the name line the email, the sub line the plan
+  el('acc-ok').textContent = email || 'Connected'
+  el('acc-sub').textContent = p?.plan || 'your real usage is live'
+  el('acc-avatar').textContent = email ? email[0].toUpperCase() : '●'
   const chip = el('account-chip')
   const mini = el('mini-acct')
   if (!email) {
@@ -944,11 +920,21 @@ function toggleSection(id, force) {
   sec.classList.toggle('folded', folded)
   const head = sec.querySelector('.sec-head')
   if (head) head.setAttribute('aria-expanded', String(!folded))
-  // the column width could not be measured while hidden
-  if (!folded) fitNames(sec.querySelector('.sec-body'))
   // the card just changed height, and the next usage poll is seconds away —
-  // without this the window keeps its old size and clips the content
+  // without this the window keeps its old size and clips the content. The body
+  // slides now rather than snapping, so size it again once that settles.
   fitSize()
+  // ...and again when the slide lands. The listener has to check what finished:
+  // the bar widths inside the section transition too, and those events bubble up
+  // here — resizing on one of them catches the card mid-slide.
+  const body = sec.querySelector('.sec-body')
+  if (!body) return
+  const settle = (e) => {
+    if (e.target !== body || e.propertyName !== 'grid-template-rows') return
+    body.removeEventListener('transitionend', settle)
+    fitSize()
+  }
+  body.addEventListener('transitionend', settle)
 }
 
 for (const head of document.querySelectorAll('.sec-head')) {
@@ -1111,7 +1097,26 @@ function openSettings() {
   document.body.classList.add('settings-open')
   fitSize()
 }
-el('gear').addEventListener('click', openSettings)
+
+// Leaving settings plays the panel out to the right while home slides back in.
+// The panel is lifted out of the flow for those few frames (see .settings-closing
+// in the stylesheet), so the card can already be measured at its home height.
+let closingTimer = null
+function closeSettings() {
+  if (!document.body.classList.contains('settings-open')) return
+  abandonLogin()
+  document.body.classList.remove('settings-open')
+  document.body.classList.add('settings-closing')
+  clearTimeout(closingTimer)
+  closingTimer = setTimeout(() => document.body.classList.remove('settings-closing'), 600)
+  clearSaveDirty()
+  applyZoom(currentConfig?.zoom != null ? currentConfig.zoom : 100) // undo the preview
+  fitSize()
+}
+el('gear').addEventListener('click', () => {
+  if (document.body.classList.contains('settings-open')) closeSettings()
+  else openSettings()
+})
 // the "connect" placeholder jumps straight to settings
 el('limits-connect').addEventListener('click', openSettings)
 // custom number steppers (▲ / ▼)
@@ -1140,13 +1145,7 @@ for (const b of document.querySelectorAll('#set-mode .seg-btn')) {
     refreshSaveDirty()
   })
 }
-el('set-cancel').addEventListener('click', () => {
-  abandonLogin()
-  document.body.classList.remove('settings-open')
-  clearSaveDirty()
-  applyZoom(currentConfig?.zoom != null ? currentConfig.zoom : 100) // undo the preview
-  fitSize()
-})
+el('set-cancel').addEventListener('click', closeSettings)
 el('set-save').addEventListener('click', () => {
   abandonLogin() // leaving the panel gives up on a login waiting for its code
   const num = (id) => parseFloat(el(id).value)
